@@ -10,7 +10,7 @@ from typing import Optional
 import psutil
 import typer
 
-from local_ml_toolkit.model import DEFAULT_MODEL, LocalTextClassifier
+from ml_toolkit.time_series.models import DEFAULT_MODEL, LocalTextClassifier
 
 app = typer.Typer(help="Run pretrained models locally and benchmark inference.")
 

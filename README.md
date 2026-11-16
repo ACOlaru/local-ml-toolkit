@@ -53,7 +53,7 @@ local-ml predict \
 Run the API:
 
 ```bash
-uvicorn local_ml_toolkit.api:app --reload
+uvicorn ml_toolkit.api:app --reload
 ```
 
 Then:
@@ -96,7 +96,7 @@ Small models and small batches can be slower on GPU because of transfer and laun
 ## Python API
 
 ```python
-from local_ml_toolkit import LocalTextClassifier
+from ml_toolkit import LocalTextClassifier
 
 model = LocalTextClassifier()
 result = model.predict("A clear and useful example.")
@@ -124,7 +124,7 @@ use the local Hugging Face cache. This project does not upload input text to an 
 ## Project structure
 
 ```text
-src/local_ml_toolkit/
+src/ml_toolkit/
   __init__.py
   model.py
   cli.py

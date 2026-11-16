@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from local_ml_toolkit.api import app, get_model
+from ml_toolkit.time_series.api import app, get_model
 
 
 class FakeClassifier:
@@ -10,7 +10,7 @@ class FakeClassifier:
 
 def test_predict_endpoint(monkeypatch):
     get_model.cache_clear()
-    monkeypatch.setattr("local_ml_toolkit.api.get_model", lambda: FakeClassifier())
+    monkeypatch.setattr("ml_toolkit.time_series.api.get_model", lambda: FakeClassifier())
     client = TestClient(app)
 
     response = client.post("/predict", json={"texts": ["hello"]})

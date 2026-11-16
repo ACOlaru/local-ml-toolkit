@@ -1,8 +1,7 @@
-"""Local Hugging Face inference wrapper."""
-
-from __future__ import annotations
+"""Simple forecasting models used as benchmark baselines."""
 
 from typing import Any, Sequence
+import numpy as np
 
 DEFAULT_MODEL = "distilbert/distilbert-base-uncased-finetuned-sst-2-english"
 
@@ -94,3 +93,91 @@ class LocalTextClassifier:
         for start in range(0, len(texts), self.batch_size):
             batch = texts[start : start + self.batch_size]
             yield from self.predict_many(batch)
+
+class NaiveForecaster:
+    """Predict every future value using the latest observation."""
+
+    name = "naive"
+
+    def fit(self, values):
+        data = np.asarray(values, dtype=float)
+
+        if data.ndim != 1 or len(data) == 0:
+            raise ValueError("Training data must be a non-empty 1D array.")
+
+        if not np.all(np.isfinite(data)):
+            raise ValueError("Training data must not contain missing values.")
+
+        self.last_value = float(data[-1])
+        return self
+
+    def predict(self, steps):
+        if steps <= 0:
+            raise ValueError("steps must be positive.")
+
+        return np.full(steps, self.last_value)
+
+
+class MovingAverageForecaster:
+    """Forecast using the average of the most recent observations."""
+
+    name = "moving_average"
+
+    def __init__(self, window=5):
+        if window <= 0:
+            raise ValueError("window must be positive.")
+
+        self.window = window
+
+    def fit(self, values):
+        data = np.asarray(values, dtype=float)
+
+        if data.ndim != 1 or len(data) < self.window:
+            raise ValueError("Not enough training data for the window.")
+
+        if not np.all(np.isfinite(data)):
+            raise ValueError("Training data must not contain missing values.")
+
+        self.average = float(np.mean(data[-self.window:]))
+        return self
+
+    def predict(self, steps):
+        if steps <= 0:
+            raise ValueError("steps must be positive.")
+
+        return np.full(steps, self.average)
+
+
+class ExponentialSmoothingForecaster:
+    """Simple exponential smoothing without a seasonal component."""
+
+    name = "exponential_smoothing"
+
+    def __init__(self, alpha=0.3):
+        if not 0 < alpha <= 1:
+            raise ValueError("alpha must be in the interval (0, 1].")
+
+        self.alpha = alpha
+
+    def fit(self, values):
+        data = np.asarray(values, dtype=float)
+
+        if data.ndim != 1 or len(data) == 0:
+            raise ValueError("Training data must be a non-empty 1D array.")
+
+        if not np.all(np.isfinite(data)):
+            raise ValueError("Training data must not contain missing values.")
+
+        estimate = data[0]
+
+        for value in data[1:]:
+            estimate = self.alpha * value + (1 - self.alpha) * estimate
+
+        self.estimate = float(estimate)
+        return self
+
+    def predict(self, steps):
+        if steps <= 0:
+            raise ValueError("steps must be positive.")
+
+        return np.full(steps, self.estimate)

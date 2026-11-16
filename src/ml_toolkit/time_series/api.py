@@ -7,7 +7,7 @@ from functools import lru_cache
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from local_ml_toolkit.model import DEFAULT_MODEL, LocalTextClassifier
+from ml_toolkit.time_series.models import DEFAULT_MODEL, LocalTextClassifier
 
 app = FastAPI(
     title="Local ML Toolkit",
